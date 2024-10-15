@@ -1,9 +1,10 @@
 package service
 
 import (
-	configIns "github.com/TestsLing/aj-captcha-go/config"
 	"log"
 	"sync"
+
+	configIns "github.com/weiwolves/aj-captcha-go/config"
 )
 
 // CaptchaServiceFactory 验证码服务工厂
@@ -17,7 +18,6 @@ type CaptchaServiceFactory struct {
 }
 
 func NewCaptchaServiceFactory(config *configIns.Config) *CaptchaServiceFactory {
-
 	factory := &CaptchaServiceFactory{
 		ServiceMap: make(map[string]CaptchaInterface),
 		CacheMap:   make(map[string]CaptchaCacheInterface),

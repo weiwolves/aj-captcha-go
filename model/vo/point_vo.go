@@ -25,7 +25,6 @@ func (p *PointVO) UnmarshalJSON(data []byte) error {
 		Y         float64 `json:"y,float64"`
 		SecretKey string
 	}{}
-
 	if err := json.Unmarshal(data, &clientPoint); err != nil {
 		return err
 	}

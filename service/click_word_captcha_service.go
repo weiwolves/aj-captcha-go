@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	constant "github.com/TestsLing/aj-captcha-go/const"
-	"github.com/TestsLing/aj-captcha-go/model/vo"
-	"github.com/TestsLing/aj-captcha-go/util"
-	img "github.com/TestsLing/aj-captcha-go/util/image"
 	"log"
+
+	"github.com/weiwolves/aj-captcha-go/model/vo"
+	"github.com/weiwolves/aj-captcha-go/util"
+	img "github.com/weiwolves/aj-captcha-go/util/image"
 )
 
 const (
@@ -20,7 +20,17 @@ type ClickWordCaptchaService struct {
 }
 
 func NewClickWordCaptchaService(factory *CaptchaServiceFactory) *ClickWordCaptchaService {
-	img.SetUp(factory.config.ResourcePath)
+	if factory.config.BackgroundImageDirectory != "" && factory.config.ClickBackgroundImageDirectory != "" && factory.config.TemplateImageDirectory != "" && factory.config.FontPath != "" {
+		img.SetUp(factory.config.ResourcePath, []string{
+			factory.config.BackgroundImageDirectory,
+			factory.config.ClickBackgroundImageDirectory,
+			factory.config.TemplateImageDirectory,
+			factory.config.FontPath,
+		}...)
+	} else {
+		img.SetUp(factory.config.ResourcePath)
+	}
+
 	return &ClickWordCaptchaService{factory: factory}
 }
 
@@ -45,7 +55,7 @@ func (c *ClickWordCaptchaService) Get() (map[string]interface{}, error) {
 	data["secretKey"] = pointList[0].SecretKey
 	data["token"] = util.GetUuid()
 
-	codeKey := fmt.Sprintf(constant.CodeKeyPrefix, data["token"])
+	codeKey := fmt.Sprintf(c.factory.config.CodeKeyPrefix, data["token"])
 	jsonPoint, err := json.Marshal(pointList)
 	if err != nil {
 		log.Printf("point json Marshal err: %v", err)
@@ -58,30 +68,26 @@ func (c *ClickWordCaptchaService) Get() (map[string]interface{}, error) {
 
 func (c *ClickWordCaptchaService) Check(token string, pointJson string) error {
 	cache := c.factory.GetCache()
-	codeKey := fmt.Sprintf(constant.CodeKeyPrefix, token)
-
+	codeKey := fmt.Sprintf(c.factory.config.CodeKeyPrefix, token)
 	cachePointInfo := cache.Get(codeKey)
-
 	if cachePointInfo == "" {
 		return errors.New("验证码已失效")
 	}
 
 	// 解析结构体
 	var cachePoint []vo.PointVO
-
 	var userPoint []vo.PointVO
-
 	err := json.Unmarshal([]byte(cachePointInfo), &cachePoint)
-
 	if err != nil {
 		return err
 	}
 
 	// 解密前端传递过来的数据
-	userPointJson := util.AesDecrypt(pointJson, cachePoint[0].SecretKey)
-
+	userPointJson := pointJson
+	if c.factory.config.EncryptEnabled {
+		userPointJson = util.AesDecrypt(pointJson, cachePoint[0].SecretKey)
+	}
 	err = json.Unmarshal([]byte(userPointJson), &userPoint)
-
 	if err != nil {
 		return err
 	}
@@ -102,7 +108,7 @@ func (c *ClickWordCaptchaService) Verification(token string, pointJson string) e
 	if err != nil {
 		return err
 	}
-	codeKey := fmt.Sprintf(constant.CodeKeyPrefix, token)
+	codeKey := fmt.Sprintf(c.factory.config.CodeKeyPrefix, token)
 	c.factory.GetCache().Delete(codeKey)
 	return nil
 }

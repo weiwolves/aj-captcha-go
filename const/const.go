@@ -2,7 +2,7 @@ package constant
 
 const (
 	// CodeKeyPrefix 缓存key前缀
-	CodeKeyPrefix = "RUNNING:CAPTCHA:%s"
+	CodeKeyPrefix = "captcha:%s"
 
 	// BlockPuzzleCaptcha 滑动验证码服务标识
 	BlockPuzzleCaptcha = "blockPuzzle"
@@ -15,12 +15,15 @@ const (
 	// RedisCacheKey redis缓存标识
 	RedisCacheKey = "redis"
 
+	CacheTypeMem   = "mem"
+	CacheTypeRedis = "redis"
+
 	// DefaultFont 字体文件地址
 	DefaultFont = "/resources/fonts/WenQuanZhengHei.ttf"
 	// DefaultResourceRoot 默认根目录
 	DefaultResourceRoot = "./"
 	// DefaultText 默认水印显示文字
-	DefaultText = "我的水印"
+	DefaultText = "CAPTCHA 水印"
 )
 
 const (

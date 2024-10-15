@@ -2,17 +2,17 @@
 
 ## Introduction
 
-在原作（github.com/TestsLing/aj-captcha-go）基础上增加一些配置项
+在原作（github.com/weiwolves/aj-captcha-go）基础上增加一些配置项
 
 `aj-captcha` 滑动验证码的 `Go` 语言实现
 
 ### Summary
 
-| 术语    | 描述                                                                  |
-|-------|---------------------------------------------------------------------|
-| 验证码类型 | 1）滑动拼图 blockPuzzle  2）文字点选 clickWord                                |
-| 验证    | 用户拖动/点击一次验证码拼图即视为一次“验证”，不论拼图/点击是否正确                                 |
-| 二次校验  | 验证数据随表单提交到后台后，后台需要调用captchaService.verification做二次校验。目的是核实验证数据的有效性。 |
+| 术语       | 描述                                                                                                          |
+| ---------- | ------------------------------------------------------------------------------------------------------------- |
+| 验证码类型 | 1）滑动拼图 blockPuzzle 2）文字点选 clickWord                                                                 |
+| 验证       | 用户拖动/点击一次验证码拼图即视为一次“验证”，不论拼图/点击是否正确                                            |
+| 二次校验   | 验证数据随表单提交到后台后，后台需要调用 captchaService.verification 做二次校验。目的是核实验证数据的有效性。 |
 
 ### Features
 
@@ -27,9 +27,9 @@
 
 ## Requirements
 
-- github.com/golang/freetype  作为字体绘制依赖
-- golang.org/x/image  图片操作
-- github.com/go-redis/redis redis库
+- github.com/golang/freetype 作为字体绘制依赖
+- golang.org/x/image 图片操作
+- github.com/go-redis/redis redis 库
 
 ## Configuration
 
@@ -47,7 +47,7 @@ type BlockPuzzleConfig struct {
 
 type ClickWordConfig struct {
 	FontSize int // 点击验证文字的大小
-	FontNum  int // 点击验证的文字的随机数量 
+	FontNum  int // 点击验证的文字的随机数量
 }
 
 //redis配置选项
@@ -100,24 +100,23 @@ func NewConfig() *Config {
 
 ```
 
-
 ## Installation
 
 ```bash
-go get -u github.com/TestsLing/aj-captcha-go
+go get -u github.com/weiwolves/aj-captcha-go
 ```
 
 ## Usage
 
-- gin框架
+- gin 框架
 
 ```go
 package main
 
 import (
-	config2 "github.com/TestsLing/aj-captcha-go/config"
-	"github.com/TestsLing/aj-captcha-go/service"
-	"github.com/TestsLing/aj-captcha-go/const"
+	config2 "github.com/weiwolves/aj-captcha-go/config"
+	"github.com/weiwolves/aj-captcha-go/service"
+	"github.com/weiwolves/aj-captcha-go/const"
 	"github.com/gin-gonic/gin"
 )
 
@@ -165,7 +164,7 @@ func main() {
 	//注册自定义配置redis数据库
 	//factory.RegisterCache(constant.RedisCacheKey, service.NewConfigRedisCacheService([]string{"127.0.0.1:6379"},
 	//,"", "", false, 0))
-	
+
 	// 注册了两种验证码服务 可以自行实现更多的验证
 	factory.RegisterService(constant.ClickWordCaptcha, service.NewClickWordCaptchaService(factory))
 	factory.RegisterService(constant.BlockPuzzleCaptcha, service.NewBlockPuzzleCaptchaService(factory))
@@ -199,8 +198,8 @@ func main() {
 
 ## Changelog
 
-- 2022.9.29  将静态资源配置暴露
-- 2022.7.12  初次提交Go实现
+- 2022.9.29 将静态资源配置暴露
+- 2022.7.12 初次提交 Go 实现
 
 ### Contact
 

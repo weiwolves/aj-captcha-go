@@ -2,8 +2,8 @@ package test
 
 import (
 	"fmt"
-	"github.com/TestsLing/aj-captcha-go/service"
-	"github.com/TestsLing/aj-captcha-go/util"
+	"github.com/weiwolves/aj-captcha-go/service"
+	"github.com/weiwolves/aj-captcha-go/util"
 	"image/color"
 	"testing"
 )

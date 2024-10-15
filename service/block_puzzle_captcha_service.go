@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	constant "github.com/TestsLing/aj-captcha-go/const"
-	"github.com/TestsLing/aj-captcha-go/model/vo"
-	"github.com/TestsLing/aj-captcha-go/util"
-	img "github.com/TestsLing/aj-captcha-go/util/image"
-	"golang.org/x/image/colornames"
 	"log"
 	"math"
+
+	"github.com/weiwolves/aj-captcha-go/model/vo"
+	"github.com/weiwolves/aj-captcha-go/util"
+	img "github.com/weiwolves/aj-captcha-go/util/image"
+	"golang.org/x/image/colornames"
 )
 
 type BlockPuzzleCaptchaService struct {
@@ -20,7 +20,16 @@ type BlockPuzzleCaptchaService struct {
 
 func NewBlockPuzzleCaptchaService(factory *CaptchaServiceFactory) *BlockPuzzleCaptchaService {
 	// 初始化静态资源
-	img.SetUp(factory.config.ResourcePath)
+	if factory.config.BackgroundImageDirectory != "" && factory.config.ClickBackgroundImageDirectory != "" && factory.config.TemplateImageDirectory != "" && factory.config.FontPath != "" {
+		img.SetUp(factory.config.ResourcePath, []string{
+			factory.config.BackgroundImageDirectory,
+			factory.config.ClickBackgroundImageDirectory,
+			factory.config.TemplateImageDirectory,
+			factory.config.FontPath,
+		}...)
+	} else {
+		img.SetUp(factory.config.ResourcePath)
+	}
 
 	return &BlockPuzzleCaptchaService{
 		factory: factory,
@@ -29,7 +38,6 @@ func NewBlockPuzzleCaptchaService(factory *CaptchaServiceFactory) *BlockPuzzleCa
 
 // Get 获取验证码图片信息
 func (b *BlockPuzzleCaptchaService) Get() (map[string]interface{}, error) {
-
 	// 初始化背景图片
 	backgroundImage := img.GetBackgroundImage()
 
@@ -55,7 +63,7 @@ func (b *BlockPuzzleCaptchaService) Get() (map[string]interface{}, error) {
 	data["secretKey"] = b.point.SecretKey
 	data["token"] = util.GetUuid()
 
-	codeKey := fmt.Sprintf(constant.CodeKeyPrefix, data["token"])
+	codeKey := fmt.Sprintf(b.factory.config.CodeKeyPrefix, data["token"])
 	jsonPoint, err := json.Marshal(b.point)
 	if err != nil {
 		log.Printf("point json Marshal err: %v", err)
@@ -180,17 +188,18 @@ func (b *BlockPuzzleCaptchaService) generateJigsawPoint(backgroundImage *util.Im
 		y = util.RandomInt(5, heightDifference)
 	}
 	point := vo.PointVO{X: x, Y: y}
-	point.SetSecretKey(util.RandString(16))
+	if b.factory.config.EncryptEnabled {
+		point.SetSecretKey(util.RandString(16))
+	} else {
+		point.SetSecretKey("")
+	}
 	b.point = point
 }
 
 func (b *BlockPuzzleCaptchaService) Check(token string, pointJson string) error {
 	cache := b.factory.GetCache()
-
-	codeKey := fmt.Sprintf(constant.CodeKeyPrefix, token)
-
+	codeKey := fmt.Sprintf(b.factory.config.CodeKeyPrefix, token)
 	cachePointInfo := cache.Get(codeKey)
-
 	if cachePointInfo == "" {
 		return errors.New("验证码已失效")
 	}
@@ -199,16 +208,16 @@ func (b *BlockPuzzleCaptchaService) Check(token string, pointJson string) error 
 	cachePoint := &vo.PointVO{}
 	userPoint := &vo.PointVO{}
 	err := json.Unmarshal([]byte(cachePointInfo), cachePoint)
-
 	if err != nil {
 		return err
 	}
 
-	// 解密前端传递过来的数据
-	userPointJson := util.AesDecrypt(pointJson, cachePoint.SecretKey)
-
+	userPointJson := pointJson
+	if cachePoint.SecretKey == "" {
+		// 解密前端传递过来的数据
+		userPointJson = util.AesDecrypt(pointJson, cachePoint.SecretKey)
+	}
 	err = json.Unmarshal([]byte(userPointJson), userPoint)
-
 	if err != nil {
 		return err
 	}
@@ -226,7 +235,7 @@ func (b *BlockPuzzleCaptchaService) Verification(token string, pointJson string)
 	if err != nil {
 		return err
 	}
-	codeKey := fmt.Sprintf(constant.CodeKeyPrefix, token)
+	codeKey := fmt.Sprintf(b.factory.config.CodeKeyPrefix, token)
 	b.factory.GetCache().Delete(codeKey)
 	return nil
 }

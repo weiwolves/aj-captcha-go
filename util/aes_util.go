@@ -28,11 +28,11 @@ func AesEncryptToBytes(data, key []byte) []byte {
 
 func AesDecrypt(point string, key string) string {
 	encryptBytes, _ := base64.StdEncoding.DecodeString(point)
-	info := AESDecryptECB(encryptBytes, []byte(key))
+	info := AesDecryptECB(encryptBytes, []byte(key))
 	return string(info)
 }
 
-func AESDecryptECB(data, key []byte) []byte {
+func AesDecryptECB(data, key []byte) []byte {
 	block, _ := aes.NewCipher(key)
 	decrypted := make([]byte, len(data))
 	size := block.BlockSize()

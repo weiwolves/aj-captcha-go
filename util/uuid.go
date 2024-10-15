@@ -25,7 +25,7 @@ func RandString(codeLen int) string {
 	buf := make([]byte, 0, codeLen)
 	b := bytes.NewBuffer(buf)
 	// 随机从中获取
-	rand2.Seed(time.Now().UnixNano())
+	rand2.New(rand2.NewSource(time.Now().UnixNano())).Seed(time.Now().UnixNano())
 	for rawStrLen := len(rawStr); codeLen > 0; codeLen-- {
 		randNum := rand2.Intn(rawStrLen)
 		b.WriteByte(rawStr[randNum])
