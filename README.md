@@ -2,6 +2,8 @@
 
 ## Introduction
 
+在原作（github.com/TestsLing/aj-captcha-go）基础上增加一些配置项
+
 `aj-captcha` 滑动验证码的 `Go` 语言实现
 
 ### Summary
