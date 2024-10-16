@@ -3,7 +3,6 @@ package service
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"log"
 	"math"
 
@@ -63,7 +62,7 @@ func (b *BlockPuzzleCaptchaService) Get() (map[string]interface{}, error) {
 	data["secretKey"] = b.point.SecretKey
 	data["token"] = util.GetUuid()
 
-	codeKey := fmt.Sprintf(b.factory.config.CodeKeyPrefix, data["token"])
+	codeKey := b.factory.config.CodeKeyPrefix + data["token"].(string)
 	jsonPoint, err := json.Marshal(b.point)
 	if err != nil {
 		log.Printf("point json Marshal err: %v", err)
@@ -198,7 +197,7 @@ func (b *BlockPuzzleCaptchaService) generateJigsawPoint(backgroundImage *util.Im
 
 func (b *BlockPuzzleCaptchaService) Check(token string, pointJson string) error {
 	cache := b.factory.GetCache()
-	codeKey := fmt.Sprintf(b.factory.config.CodeKeyPrefix, token)
+	codeKey := b.factory.config.CodeKeyPrefix + token
 	cachePointInfo := cache.Get(codeKey)
 	if cachePointInfo == "" {
 		return errors.New("验证码已失效")
@@ -213,7 +212,7 @@ func (b *BlockPuzzleCaptchaService) Check(token string, pointJson string) error 
 	}
 
 	userPointJson := pointJson
-	if cachePoint.SecretKey == "" {
+	if cachePoint.SecretKey != "" {
 		// 解密前端传递过来的数据
 		userPointJson = util.AesDecrypt(pointJson, cachePoint.SecretKey)
 	}
@@ -235,7 +234,7 @@ func (b *BlockPuzzleCaptchaService) Verification(token string, pointJson string)
 	if err != nil {
 		return err
 	}
-	codeKey := fmt.Sprintf(b.factory.config.CodeKeyPrefix, token)
+	codeKey := b.factory.config.CodeKeyPrefix + token
 	b.factory.GetCache().Delete(codeKey)
 	return nil
 }

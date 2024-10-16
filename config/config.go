@@ -149,8 +149,8 @@ func BuildConfigEx(cacheType string,
 	encryptEnabled bool,
 	codeKeyPrefix string,
 	backgroundImageDirectory string,
-	clickBackgroundImageDirectory string,
 	templateImageDirectory string,
+	clickBackgroundImageDirectory string,
 	fontPath string,
 ) *Config {
 	if len(resourcePath) == 0 {

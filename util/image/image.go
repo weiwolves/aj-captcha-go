@@ -23,7 +23,7 @@ func SetUp(resourcePath string, dirs ...string) {
 
 	var backgroundImageRoot, templateImageRoot, clickBackgroundImageRoot string
 	//root := "/Users/skyline/go/src/aj-captcha-go"
-	if len(dirs) == 3 {
+	if len(dirs) == 4 {
 		backgroundImageRoot = root + dirs[0]
 		clickBackgroundImageRoot = root + dirs[1]
 		templateImageRoot = root + dirs[2]

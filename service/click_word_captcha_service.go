@@ -3,7 +3,6 @@ package service
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"log"
 
 	"github.com/weiwolves/aj-captcha-go/model/vo"
@@ -55,7 +54,7 @@ func (c *ClickWordCaptchaService) Get() (map[string]interface{}, error) {
 	data["secretKey"] = pointList[0].SecretKey
 	data["token"] = util.GetUuid()
 
-	codeKey := fmt.Sprintf(c.factory.config.CodeKeyPrefix, data["token"])
+	codeKey := c.factory.config.CodeKeyPrefix + data["token"].(string)
 	jsonPoint, err := json.Marshal(pointList)
 	if err != nil {
 		log.Printf("point json Marshal err: %v", err)
@@ -68,7 +67,7 @@ func (c *ClickWordCaptchaService) Get() (map[string]interface{}, error) {
 
 func (c *ClickWordCaptchaService) Check(token string, pointJson string) error {
 	cache := c.factory.GetCache()
-	codeKey := fmt.Sprintf(c.factory.config.CodeKeyPrefix, token)
+	codeKey := c.factory.config.CodeKeyPrefix + token
 	cachePointInfo := cache.Get(codeKey)
 	if cachePointInfo == "" {
 		return errors.New("验证码已失效")
@@ -108,7 +107,7 @@ func (c *ClickWordCaptchaService) Verification(token string, pointJson string) e
 	if err != nil {
 		return err
 	}
-	codeKey := fmt.Sprintf(c.factory.config.CodeKeyPrefix, token)
+	codeKey := c.factory.config.CodeKeyPrefix + token
 	c.factory.GetCache().Delete(codeKey)
 	return nil
 }
@@ -126,11 +125,16 @@ func (c *ClickWordCaptchaService) getImageData(image *util.ImageUtil) ([]vo.Poin
 	i := 0
 
 	// 构建本次的 secret
-	key := util.RandString(16)
+	key := ""
+	if c.factory.config.EncryptEnabled {
+		key = util.RandString(16)
+	}
 
 	for _, s := range currentWord {
 		point := c.randomWordPoint(image.Width, image.Height, i, wordCount)
-		point.SetSecretKey(key)
+		if key != "" {
+			point.SetSecretKey(key)
+		}
 		// 随机设置文字 TODO 角度未设置
 		err := image.SetArtText(s, c.factory.config.ClickWord.FontSize, point)
 
